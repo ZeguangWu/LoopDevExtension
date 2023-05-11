@@ -28,6 +28,12 @@ table {
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
   content-visibility: auto;
   contain-intrinsic-size: 23px;
+  position: relative;
+}
+
+thead {
+  position: sticky;
+  top: 55px;
 }
 
 thead th {
@@ -71,4 +77,76 @@ tbody tr.tr-warn {
 
 tbody tr.tr-error {
   background-color: lightcoral;
+}
+
+/* collapse */
+.tableCollapsibleButton {
+  position: sticky;
+  top: 0px;
+  z-index: 1000;
+}
+
+.collapsibleButton {
+  background-color: lightseagreen;
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  margin: 0 0 10px 0;
+}
+
+.active,
+.collapsibleButton:hover {
+  background-color: rgb(14, 104, 100);
+}
+
+.collapsibleContent {
+  padding: 18px;
+  background-color: #f1f1f1;
+  overflow-x: clip;
+}
+
+.collapsibleContent.collapsed {
+  display: none;
+}
+
+/* Scrollbar element*/
+.scrollbar {
+  height: 15px;
+  /* must be larger than the scrollbar size */
+  overflow: auto;
+  position: sticky;
+  /* make scrollbar sticky to the bottom of the table */
+  bottom: 5px;
+  z-index: 1000;
+  /* make sure scrollbar is on top of the table */
+}
+
+.scrollable {
+  height: 0px;
+}
+
+/*
+ *  Styling the scrollbar
+ */
+
+.scrollbar::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  background-color: #F5F5F5;
+}
+
+.scrollbar::-webkit-scrollbar {
+  height: 10px;
+  background-color: #F5F5F5;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+  background-color: #555;
 }

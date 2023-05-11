@@ -116,35 +116,6 @@ button:active {
     transform: translateY(4px);
 }
 
-/* collapse */
-.collapsibleButton {
-    background-color: lightseagreen;
-    color: white;
-    cursor: pointer;
-    padding: 18px;
-    width: 100%;
-    border: none;
-    text-align: left;
-    outline: none;
-    font-size: 15px;
-    margin: 0 0 10px 0;
-}
-
-.active,
-.collapsibleButton:hover {
-    background-color: rgb(14, 104, 100);
-}
-
-.collapsibleContent {
-    padding: 18px;
-    overflow: auto;
-    background-color: #f1f1f1;
-}
-
-.collapsibleContent.collapsed {
-    display: none;
-}
-
 /* general */
 .section {
     margin: 10px;

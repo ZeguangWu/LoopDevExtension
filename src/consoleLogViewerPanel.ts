@@ -10,7 +10,9 @@ export type ConsoleLogViewerPanelWindow = Window &
     shouldCapture: boolean;
   };
 
+let resizeObserver: ResizeObserver;
 $(function () {
+  resizeObserver = new ResizeObserver(onTableResize);
   (window as ConsoleLogViewerPanelWindow).tables = new Map();
   (window as ConsoleLogViewerPanelWindow).addData = (dataList: RowData[]) => {
     for (const rowData of dataList) {
@@ -125,6 +127,7 @@ function createTable(tableName: string): HTMLTable {
   const collapseButton = document.createElement("button");
   collapseButton.textContent = tableName;
   collapseButton.classList.add("collapsibleButton");
+  collapseButton.classList.add("tableCollapsibleButton");
   collapseButton.addEventListener("click", (e) => {
     collapseButton.classList.toggle("active");
     var content = tableWrapper.querySelector(".collapsibleContent");
@@ -150,11 +153,36 @@ function createTable(tableName: string): HTMLTable {
   const tableElement = document.createElement("table");
   tableElement.appendChild(document.createElement("thead"));
   tableElement.appendChild(document.createElement("tbody"));
-
   contentContainer.appendChild(tableElement);
+
+  // add a horizontal scrollbar.
+  const scrollbar = document.createElement("div");
+  scrollbar.classList.add("scrollbar");
+  const scrollContent = document.createElement("div");
+  scrollContent.classList.add("scrollContent");
+  scrollbar.appendChild(scrollContent);
+  scrollbar.addEventListener("scroll", () => {
+    tableElement.style.left = -scrollbar.scrollLeft + "px";
+  });
+  contentContainer.appendChild(scrollbar);
+
+  // observer table element size to update scrollbar.
+  resizeObserver.observe(tableElement);
+
   containerElement.appendChild(tableWrapper);
 
   return new HTMLTable(tableElement);
+}
+
+function onTableResize(entries: ResizeObserverEntry[], observer: ResizeObserver): void {
+  entries.forEach((entry) => {
+    const tableElement = entry.target as HTMLTableElement;
+    const scrollbar = tableElement.nextElementSibling;
+    const scrollableContent = scrollbar?.firstElementChild as HTMLDivElement;
+    if (scrollableContent?.classList.contains("scrollContent")) {
+      scrollableContent.style.width = `${tableElement.scrollWidth}px`;
+    }
+  });
 }
 
 function popUpColumnChooserDialog(tableName: string) {
