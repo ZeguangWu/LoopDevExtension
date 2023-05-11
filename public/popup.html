@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <script src="popup.js"></script>
+    <link rel="stylesheet" href="uiControl.css" />
+    <link rel="stylesheet" href="popup.css" />
+</head>
+
+<body>
+    <div class="popUpHeader">
+        <h1>Config</h1>
+    </div>
+    <div class="section">
+        <div class="configGroup">
+            <div class="config">
+                <label>Enabled</label>
+                <label class="toggle">
+                    <input type="checkbox" id="toggleExtensionEnabled" />
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="subSection" id="configGroups">
+        <div class="configGroup">
+            <div class="config">
+                <label title="double click image to preview in a pop up dialog">Image preview popup</label>
+                <label class="toggle">
+                    <input type="checkbox" id="toggleImagePreviewPopupEnabled" />
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="configGroup">
+            <div class="config">
+                <label title="enable console log viewer in dev tools">Console Log Viewer</label>
+                <label class="toggle">
+                    <input type="checkbox" id="toggleConsoleLogViewerEnabled" />
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="subSection" id="consoleLogConfigGroups">
+                <div class="config">
+                    <label title="Bypass Console Logs">Bypass Console Log</label>
+                    <label class="toggle">
+                        <input type="checkbox" id="toggleBypassConsoleLog" />
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

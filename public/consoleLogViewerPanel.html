@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="uiControl.css" />
+  <link rel="stylesheet" href="consoleLogViewerPanel.css" />
+  <script src="consoleLogViewerPanel.js"></script>
+</head>
+
+<body>
+  <div class="header section">
+    <h1 style="color:#FFFFFF">Console Log Viewer</h1>
+    <div class="controlContainer">
+      <div class="configGroup">
+        <div class="config inline">
+          <label>Capture</label>
+          <label class="toggle">
+            <input type="checkbox" id="toggleCapture" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="config inline">
+          <button id="btnClear">Clear</button>
+        </div>        
+        <div class="config inline">
+          <label>Table Filter</label>
+          <input type="text" id="txtTableFilter" placeholder="filter table" />
+        </div>
+        <div class="config inline">
+          <button id="btnExpandAll">Expand All</button>
+        </div>
+        <div class="config inline">
+          <button id="btnCollapseAll">Collapse All</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="tableContainer"></div>
+</body>
+
+</html>

@@ -1,0 +1,176 @@
+/* Toggle Switch */
+.toggle {
+    display: inline-block;
+    position: relative;
+    width: 50px;
+    height: 25px;
+    margin-left: 20px;
+}
+
+.toggle input {
+    display: none;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ddd;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 3px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: #5cb85c;
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px #5cb85c;
+}
+
+input:checked+.slider:before {
+    -webkit-transform: translateX(22px);
+    -ms-transform: translateX(22px);
+    transform: translateX(22px);
+}
+
+/* modal Dialog */
+.modalDialog {
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modalDialogContentBox {
+    background-color: #fefefe;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 60%;
+}
+
+/* The Close Button */
+.dialogClose {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.dialogClose:hover,
+.dialogClose:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* button */
+button {
+    color: #FFFFFF;
+    background-color: #5cb85c;
+    border-radius: 5px;
+    font-size: 17px;
+    font-family: 'Source Sans Pro', sans-serif;
+    padding: 6px 18px;
+    border: none;
+    vertical-align: middle;
+    overflow: hidden;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap;
+    -webkit-user-select: none;
+    user-select: none;
+    margin: 15px 0;
+}
+
+button:hover {
+    background-color: #2e6c30
+}
+
+button:active {
+    background-color: #2e6c30;
+    box-shadow: 0 5px #666;
+    transform: translateY(4px);
+}
+
+/* collapse */
+.collapsibleButton {
+    background-color: lightseagreen;
+    color: white;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+    margin: 0 0 10px 0;
+}
+
+.active,
+.collapsibleButton:hover {
+    background-color: rgb(14, 104, 100);
+}
+
+.collapsibleContent {
+    padding: 18px;
+    overflow: auto;
+    background-color: #f1f1f1;
+}
+
+.collapsibleContent.collapsed {
+    display: none;
+}
+
+/* general */
+.section {
+    margin: 10px;
+}
+
+.subSection {
+    padding-left: 50px;
+}
+
+.section label {
+    vertical-align: bottom;
+}
+
+.configGroup {
+    padding: 5px;
+    border-bottom: 1px solid #cccccc7a;
+}
+
+.config {
+    margin: 5px;
+}
+
+.inline {
+    display: inline-block;
+}
+
+.hidden {
+    display: none;
+}

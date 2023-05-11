@@ -1,0 +1,15 @@
+body {
+    font-size: 15px;
+    width: 500px;
+    margin: 0;
+}
+
+.popUpHeader {
+    background-color: #f1f1f1;
+    color: black;
+}
+
+.disabled {
+    pointer-events: none;
+    opacity: 0.4;
+}
