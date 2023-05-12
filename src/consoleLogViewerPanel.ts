@@ -242,9 +242,8 @@ function popUpColumnChooserDialog(tableName: string) {
   // add column names.
   for (const column of columns) {
     const columnDiv = document.createElement("div");
+    columnDiv.classList.add("columnWrapper");
     columnDiv.classList.add("inline");
-    columnDiv.style.width = "30%";
-    columnDiv.style.padding = "5px";
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = !column.isHidden;
@@ -269,6 +268,7 @@ function popUpColumnChooserDialog(tableName: string) {
     columnDiv.appendChild(checkbox);
     const label = document.createElement("label");
     label.textContent = column.name;
+    label.title = column.name || "";
     columnDiv.appendChild(label);
     contentBox.appendChild(columnDiv);
   }
