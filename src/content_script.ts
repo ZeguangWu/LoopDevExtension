@@ -1,24 +1,12 @@
 import $ from "jquery";
 import { ExtensionConfig, getExtensionConfig } from "./extensionConfig";
-import { RuntimeMessage } from "./message";
+import { ContentScriptInitContext } from "./ContentScriptorInitContext";
+
+import * as ConsoleLogViewer from "./extensionModules/ConsoleLogViewer/content_script";
+import * as ImageEnhancement from "./extensionModules/ImageEnhancement/content_script";
 
 let extensionConfig: ExtensionConfig;
-
-const initializePromise = (async function () {
-  extensionConfig = await getExtensionConfig();
-})();
-
-// Listen for messages from the loaded page, and forward them to devtools.
-window.addEventListener("consoleMessage", function (e: Event) {
-  const customEvent = e as CustomEvent;
-  sendMessage({
-    from: "content-script",
-    to: "devtools",
-    type: customEvent.type,
-    level: customEvent.detail.level,
-    message: customEvent.detail.message,
-  });
-});
+const scriptInjectionPromises: Promise<void>[] = [];
 
 // Listen for messages from background script
 let port: chrome.runtime.Port;
@@ -29,38 +17,8 @@ function connect() {
 
   // auto reconnect.
   port.onDisconnect.addListener(connect);
-  
-  port.onMessage.addListener((message) => {
-    if (message.to !== "content-script") {
-      return;
-    }
-
-    // send config to dev tool when it's open.
-    switch (message.type) {
-      case "devToolsOpen":
-        sendMessage({
-          from: "content-script",
-          to: "devtools",
-          type: "extensionConfig",
-          extensionConfig,
-        });
-        break;
-      case "extensionConfig":
-        // report extension config to the loaded page.
-        extensionConfig = message.extensionConfig;
-        window.dispatchEvent(new CustomEvent("extensionConfig", { detail: { extensionConfig } }));
-        break;
-      default:
-        break;
-    }
-  });
 }
-
 connect();
-
-function sendMessage(message: RuntimeMessage): void {
-  port.postMessage(message);
-}
 
 async function injectScriptTag(src: string): Promise<void> {
   const scriptElement = document.createElement("script");
@@ -75,17 +33,23 @@ async function injectScriptTag(src: string): Promise<void> {
   return promise;
 }
 
-function initialize() {
-  const scriptInjectionPromises = [];
-  scriptInjectionPromises.push(injectScriptTag(chrome.runtime.getURL("inject_consoleLog.js")));
-  scriptInjectionPromises.push(injectScriptTag(chrome.runtime.getURL("inject_imagePopup.js")));
+function initializeModule(context: ContentScriptInitContext) {
+  context.injectedScripts.forEach((script) => {
+    scriptInjectionPromises.push(injectScriptTag(script));
+  });
+}
 
-  Promise.allSettled([...scriptInjectionPromises, initializePromise]).then(() => {
+async function initialize() {
+  initializeModule(await ConsoleLogViewer.contentScript(port));
+  initializeModule(await ImageEnhancement.contentScript(port));
+
+  const extensionConfigPromise = getExtensionConfig().then((config) => (extensionConfig = config));
+  Promise.allSettled([...scriptInjectionPromises, extensionConfigPromise]).then(() => {
     // report extension config to runtime upon new page load.
-    sendMessage({
+    port.postMessage({
       from: "content-script",
       to: "devtools",
-      type: "extensionConfig",
+      type: "pageLoaded",
       extensionConfig,
     });
 
@@ -94,8 +58,8 @@ function initialize() {
   });
 }
 
-$(function () {
-  initialize();
+$(async function () {
+  await initialize();
 
   // Run initialize again upon page navigation.
   window.addEventListener("popstate", function () {

@@ -1,6 +1,5 @@
 import $ from "jquery";
-import { ExtensionConfig, getExtensionConfig, updateConfigCache } from "./extensionConfig";
-import { RuntimeMessage } from "./message";
+import { ExtensionConfig, getExtensionConfig, updateConfigCache } from "../../extensionConfig";
 
 // Listen for messages from background script
 const port = chrome.runtime.connect({
@@ -11,10 +10,6 @@ port.onMessage.addListener((message) => {
     return;
   }
 });
-
-function sendMessage(message: RuntimeMessage): void {
-  port.postMessage(message);
-}
 
 function readExtensionConfig(): ExtensionConfig {
   const extensionConfig: ExtensionConfig = {
@@ -48,13 +43,13 @@ $(async () => {
   $("input").each(function (index: number, element: HTMLElement) {
     $(element).on("change", function () {
       const newConfig = readExtensionConfig();
-      sendMessage({
+      port.postMessage({
         from: "popup",
         to: "devtools",
         type: "extensionConfig",
         extensionConfig: newConfig,
       });
-      sendMessage({
+      port.postMessage({
         from: "popup",
         to: "content-script",
         type: "extensionConfig",

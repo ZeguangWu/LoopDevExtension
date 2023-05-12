@@ -5,10 +5,10 @@
   "version": "1.0",
   "devtools_page": "devtools.html",
   "icons": {
-    "16": "icons/icon.png",
-    "32": "icons/icon.png",
-    "48": "icons/icon.png",
-    "128": "icons/icon.png"
+    "16": "assets/icons/icon.png",
+    "32": "assets/icons/icon.png",
+    "48": "assets/icons/icon.png",
+    "128": "assets/icons/icon.png"
   },
   "content_scripts": [
     {
@@ -17,7 +17,7 @@
     }
   ],
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "extensionModules/PopUp/popup.html"
   },
   "background": {
     "service_worker": "background.js"
@@ -25,7 +25,12 @@
   "web_accessible_resources": [
     {
       "matches": ["<all_urls>"],
-      "resources": ["inject_consoleLog.js", "inject_imagePopup.js", "inject_consoleLog.js.map", "inject_imagePopup.js.map"]
+      "resources": [
+        "extensionModules/ConsoleLogViewer/inject_consoleLog.js",
+        "extensionModules/ConsoleLogViewer/inject_consoleLog.js.map",
+        "extensionModules/ImageEnhancement/inject_imagePopup.js",
+        "extensionModules/ImageEnhancement/inject_imagePopup.js.map"
+      ]
     }
   ],
   "permissions": ["tabs", "scripting", "storage"],
