@@ -1,4 +1,3 @@
-import $ from "jquery";
 import { ExtensionConfig, getExtensionConfig } from "./extensionConfig";
 import { ContentScriptInitContext } from "./ContentScriptorInitContext";
 
@@ -58,7 +57,7 @@ async function initialize() {
   });
 }
 
-$(async function () {
+window.addEventListener("load", async function () {
   await initialize();
 
   // Run initialize again upon page navigation.

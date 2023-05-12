@@ -1,4 +1,3 @@
-import $ from "jquery";
 import { ExtensionConfig, getExtensionConfig, updateConfigCache } from "../../extensionConfig";
 
 // Listen for messages from background script
@@ -13,13 +12,13 @@ port.onMessage.addListener((message) => {
 
 function readExtensionConfig(): ExtensionConfig {
   const extensionConfig: ExtensionConfig = {
-    enabled: $("#toggleExtensionEnabled").prop("checked"),
+    enabled: !!document.querySelector<HTMLInputElement>("#toggleExtensionEnabled")?.checked,
     imagePreviewPopup: {
-      enabled: $("#toggleImagePreviewPopupEnabled").prop("checked"),
+      enabled: !!document.querySelector<HTMLInputElement>("#toggleImagePreviewPopupEnabled")?.checked,
     },
     consoleLogViewer: {
-      enabled: $("#toggleConsoleLogViewerEnabled").prop("checked"),
-      bypassConsoleLog: $("#toggleBypassConsoleLog").prop("checked"),
+      enabled: !!document.querySelector<HTMLInputElement>("#toggleConsoleLogViewerEnabled")?.checked,
+      bypassConsoleLog: !!document.querySelector<HTMLInputElement>("#toggleBypassConsoleLog")?.checked,
     },
   };
 
@@ -30,18 +29,18 @@ async function renderExtensionConfig() {
   let extensionConfig = await getExtensionConfig();
 
   // Set the UI based on the extension config.
-  $("#toggleExtensionEnabled").prop("checked", extensionConfig.enabled);
-  $("#toggleImagePreviewPopupEnabled").prop("checked", extensionConfig.imagePreviewPopup.enabled);
-  $("#toggleConsoleLogViewerEnabled").prop("checked", extensionConfig.consoleLogViewer.enabled);
-  $("#toggleBypassConsoleLog").prop("checked", extensionConfig.consoleLogViewer.bypassConsoleLog);
+  document.querySelector<HTMLInputElement>("#toggleExtensionEnabled")!.checked = extensionConfig.enabled;
+  document.querySelector<HTMLInputElement>("#toggleImagePreviewPopupEnabled")!.checked = extensionConfig.imagePreviewPopup.enabled;
+  document.querySelector<HTMLInputElement>("#toggleConsoleLogViewerEnabled")!.checked = extensionConfig.consoleLogViewer.enabled;
+  document.querySelector<HTMLInputElement>("#toggleBypassConsoleLog")!.checked = extensionConfig.consoleLogViewer.bypassConsoleLog;
 }
 
-$(async () => {
+window.addEventListener("load", async () => {
   await renderExtensionConfig();
 
   // Listen to change event for all controls
-  $("input").each(function (index: number, element: HTMLElement) {
-    $(element).on("change", function () {
+  [...document.querySelectorAll<HTMLInputElement>("input")].forEach((element) => {
+    element.addEventListener("change", function () {
       const newConfig = readExtensionConfig();
       port.postMessage({
         from: "popup",
@@ -60,21 +59,21 @@ $(async () => {
     });
   });
 
-  $("#toggleExtensionEnabled").on("change", function () {
-    var isChecked = $(this).prop("checked");
-    if (isChecked) {
-      $("#configGroups").removeClass("disabled");
+  document.querySelector<HTMLInputElement>("#toggleExtensionEnabled")?.addEventListener("change", function (ev) {
+    const inputElement = ev.target as HTMLInputElement;
+    if (inputElement.checked) {
+      document.querySelector("#configGroups")?.classList.remove("disabled");
     } else {
-      $("#configGroups").addClass("disabled");
+      document.querySelector("#configGroups")?.classList.add("disabled");
     }
   });
 
-  $("#toggleConsoleLogViewerEnabled").on("change", function () {
-    var isChecked = $(this).prop("checked");
-    if (isChecked) {
-      $("#consoleLogConfigGroups").removeClass("disabled");
+  document.querySelector<HTMLInputElement>("#toggleConsoleLogViewerEnabled")?.addEventListener("change", function (ev) {
+    const inputElement = ev.target as HTMLInputElement;
+    if (inputElement.checked) {
+      document.querySelector("#consoleLogConfigGroups")?.classList.remove("disabled");
     } else {
-      $("#consoleLogConfigGroups").addClass("disabled");
+      document.querySelector("#consoleLogConfigGroups")?.classList.add("disabled");
     }
   });
 });

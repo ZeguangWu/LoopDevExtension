@@ -1,4 +1,3 @@
-import $ from "jquery";
 import { HTMLTable, RowData } from "./HTMLTable";
 
 // The th element under thead
@@ -11,7 +10,7 @@ export type ConsoleLogViewerPanelWindow = Window &
   };
 
 let resizeObserver: ResizeObserver;
-$(function () {
+window.addEventListener("load", () => {
   resizeObserver = new ResizeObserver(onTableResize);
   (window as ConsoleLogViewerPanelWindow).tables = new Map();
   (window as ConsoleLogViewerPanelWindow).addData = (dataList: RowData[]) => {
@@ -43,18 +42,21 @@ $(function () {
     document.body.appendChild(modalDialog);
   };
 
-  $("#toggleCapture").on("change", (e) => {
+  document.querySelector("#toggleCapture")?.addEventListener("change", (e) => {
     (window as ConsoleLogViewerPanelWindow).shouldCapture = (e.target as HTMLInputElement).checked;
   });
 
-  $("#btnClear").on("click", (e) => {
+  document.querySelector("#btnClear")?.addEventListener("click", (e) => {
     // clear all table data.
     (window as ConsoleLogViewerPanelWindow).tables.clear();
-    $("#tableContainer").empty();
+    const tableContainer = document.querySelector("#tableContainer");
+    while (tableContainer?.firstChild) {
+      tableContainer.firstChild.remove();
+    }
   });
 
-  $("#btnExpandAll").on("click", (e) => {
-    this.documentElement.querySelectorAll(".collapsibleButton").forEach((btn) => {
+  document.querySelector("#btnExpandAll")?.addEventListener("click", (e) => {
+    document.querySelectorAll(".collapsibleButton").forEach((btn) => {
       const tableWrapper = btn.parentElement as HTMLDivElement;
       var content = tableWrapper.querySelector(".collapsibleContent") as HTMLDivElement;
 
@@ -66,8 +68,8 @@ $(function () {
     });
   });
 
-  $("#btnCollapseAll").on("click", (e) => {
-    this.documentElement.querySelectorAll(".collapsibleButton").forEach((btn) => {
+  document.querySelector("#btnCollapseAll")?.addEventListener("click", (e) => {
+    document.querySelectorAll(".collapsibleButton").forEach((btn) => {
       const tableWrapper = btn.parentElement as HTMLDivElement;
       var content = tableWrapper.querySelector(".collapsibleContent") as HTMLDivElement;
 
@@ -79,7 +81,7 @@ $(function () {
     });
   });
 
-  $("#txtTableFilter").on("input", (e) => {
+  document.querySelector("#txtTableFilter")?.addEventListener("input", (e) => {
     // Only show tables that match the filter.
     // find all table wrappers.
     const tableWrappers = document.querySelectorAll(".tableWrapper");
