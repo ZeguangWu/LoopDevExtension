@@ -5,8 +5,13 @@ body {
 }
 
 .popUpHeader {
-    background-color: #f1f1f1;
-    color: black;
+    padding: 15px;
+    background: lightslategray;
+    color: white;
+}
+
+.popUpHeader h1 {
+    margin: 0;
 }
 
 .disabled {
