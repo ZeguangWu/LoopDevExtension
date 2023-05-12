@@ -202,8 +202,10 @@ function popUpColumnChooserDialog(tableName: string) {
   // open a modal dialog with all the column names.
   const modalDialog = document.createElement("div");
   modalDialog.classList.add("modalDialog");
+  modalDialog.classList.add("columnChooserModalDialog");
   const contentBox = document.createElement("div");
   contentBox.classList.add("modalDialogContentBox");
+  contentBox.classList.add("columnChooserDialogContentBox");
   contentBox.style.fontSize = "15px";
 
   // add a header div
@@ -239,6 +241,11 @@ function popUpColumnChooserDialog(tableName: string) {
   checkAllDiv.appendChild(checkAllLabel);
   headerDiv.appendChild(checkAllDiv);
 
+  // column names div.
+  const columnNamesDiv = document.createElement("div");
+  columnNamesDiv.classList.add("columnNamesWrapper");
+  contentBox.appendChild(columnNamesDiv);
+
   // add column names.
   for (const column of columns) {
     const columnDiv = document.createElement("div");
@@ -270,7 +277,7 @@ function popUpColumnChooserDialog(tableName: string) {
     label.textContent = column.name;
     label.title = column.name || "";
     columnDiv.appendChild(label);
-    contentBox.appendChild(columnDiv);
+    columnNamesDiv.appendChild(columnDiv);
   }
 
   // add a close button to the dialog

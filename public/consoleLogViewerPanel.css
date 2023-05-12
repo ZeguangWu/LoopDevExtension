@@ -152,10 +152,24 @@ tbody tr.tr-error {
 }
 
 /* Column Chooser Dialog*/
+.columnChooserModalDialog{
+  overflow: hidden;
+}
+
 .columnWrapper{
   width: 30%;
   padding: 5px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.columnNamesWrapper{
+  overflow: auto;
+}
+
+.columnChooserDialogContentBox{
+  max-height: calc(100% - 120px);
+  display: flex;
+  flex-direction: column;
 }
