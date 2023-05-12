@@ -227,12 +227,25 @@ function popUpColumnChooserDialog(tableName: string) {
   checkAllCheckbox.type = "checkbox";
   checkAllCheckbox.checked = true;
   checkAllCheckbox.addEventListener("change", (e) => {
+    const isChecked = checkAllCheckbox.checked;
     // query all the checkboxes in the current dialog and update checked state for all.
     const checkboxes = [...modalDialog.querySelectorAll("input[type='checkbox']")] as HTMLInputElement[];
     for (const checkbox of checkboxes) {
-      checkbox.checked = checkAllCheckbox.checked;
-      checkbox.dispatchEvent(new Event("change"));
+      checkbox.checked = isChecked;
     }
+
+    // show/hide table headers (th).
+    columns
+      .map((c) => c.columnElement)
+      .forEach((columnElement) => {
+        isChecked ? columnElement.classList.remove("hidden") : columnElement.classList.add("hidden");
+      });
+
+    // show/hide table cells.
+    const tableCells = [...table.tableElement.querySelectorAll(`tbody td`)];
+    tableCells.forEach((tableCell) => {
+      isChecked ? tableCell.classList.remove("hidden") : tableCell.classList.add("hidden");
+    });
   });
   const checkAllLabel = document.createElement("label");
   checkAllLabel.textContent = "Check/Uncheck All";

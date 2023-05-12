@@ -41,7 +41,7 @@ export class HTMLTable {
     while (current) {
       let cell = newRow.insertCell();
       cell.textContent = newRow.rowData.data[current.column.name] || "";
-      if(current.classList.contains("hidden")) {
+      if (current.classList.contains("hidden")) {
         cell.classList.add("hidden");
       }
       current = current.nextSibling as ColumnElement;
@@ -55,6 +55,12 @@ export class HTMLTable {
 
     // add to the end, so all existing column index is not changed.
     this.tableElement.tHead!.append(thElement);
+
+    // Add missing cells for all existing rows.
+    [...this.tableElement.tBodies[0].rows].forEach((row) => {
+      let cell = row.insertCell();
+      cell.textContent = (row as RowElement).rowData.data[name] || "";
+    });
   }
 
   public addData(dataList: RowData[]) {
