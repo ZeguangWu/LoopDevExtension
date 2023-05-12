@@ -15,7 +15,7 @@ chrome.runtime.onConnect.addListener(function (port) {
   const parts = port.name.split(":");
   const sourceEndpoint = parts[0] as RuntimeMessageEndpoint;
 
-  if (!sourceEndpoint) {
+  if (!sourceEndpoint || !["devtools", "content-script", "popup"].includes(sourceEndpoint)) {
     return;
   }
 
@@ -74,7 +74,22 @@ chrome.runtime.onConnect.addListener(function (port) {
     }
   });
 
-  // Clean up.
+  let keepAliveTimer: NodeJS.Timeout | undefined;
+  const deleteKeepAliveTimer = () => {
+    if (keepAliveTimer) {
+      clearTimeout(keepAliveTimer);
+      keepAliveTimer = undefined;
+    }
+  };
+
+  // Chromium auto disconnect the port after 5 mins of inactivity, which the client side doesn't receive any 
+  // disconnected event. So we need to force disconnect the port after 250s of inactivity, so that the client side
+  // can reconnect accordingly to keep the connection alive.
+  keepAliveTimer = setTimeout(() => {
+    deleteKeepAliveTimer();
+    port.disconnect();
+  }, 250e3);
+
   port.onDisconnect.addListener(function (port) {
     console.log("onDisconnect", { port, ports });
     const sourceEndpoint = port.name as RuntimeMessageEndpoint;
@@ -82,8 +97,10 @@ chrome.runtime.onConnect.addListener(function (port) {
       return;
     }
 
-    const tab = port.sender?.tab?.id;
+    deleteKeepAliveTimer();
 
+    // remove port from the cache.
+    const tab = port.sender?.tab?.id;
     switch (sourceEndpoint) {
       case "content-script":
         if (tab !== undefined) {

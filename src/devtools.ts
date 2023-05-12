@@ -12,39 +12,47 @@ let pendingRowData: RowData[] = [];
 let extensionConfig: ExtensionConfig;
 
 // Listen for messages from background script
-const port = chrome.runtime.connect({
-  name: `devtools:${chrome.devtools.inspectedWindow.tabId}`,
-});
-port.onMessage.addListener((message: RuntimeMessage) => {
-  if (message.to !== "devtools") {
-    return;
-  }
+let port: chrome.runtime.Port;
+function connect() {
+  port = chrome.runtime.connect({
+    name: `devtools:${chrome.devtools.inspectedWindow.tabId}`,
+  });
 
-  switch (message.type) {
-    case "extensionConfig":
-      {
-        extensionConfig = message.extensionConfig as ExtensionConfig;
-        applyExtensionConfig(extensionConfig);
-      }
-      break;
-    case "consoleMessage":
-      if (extensionConfig.consoleLogViewer.enabled && consoleLogViewerPanelWindow && consoleLogViewerPanelWindow.shouldCapture) {
-        const parseResult = tryParseJSON(message.message);
-        if (parseResult.result) {
-          const rowData = prepTelemetryDataForOutput(parseResult.result);
-          pendingRowData.push({
-            level: message.level,
-            data: rowData
-          });
+  // auto reconnect.
+  port.onDisconnect.addListener(connect);
+
+  port.onMessage.addListener((message: RuntimeMessage) => {
+    if (message.to !== "devtools") {
+      return;
+    }
+
+    switch (message.type) {
+      case "extensionConfig":
+        {
+          extensionConfig = message.extensionConfig as ExtensionConfig;
+          applyExtensionConfig(extensionConfig);
         }
+        break;
+      case "consoleMessage":
+        if (extensionConfig.consoleLogViewer.enabled && consoleLogViewerPanelWindow && consoleLogViewerPanelWindow.shouldCapture) {
+          const parseResult = tryParseJSON(message.message);
+          if (parseResult.result) {
+            const rowData = prepTelemetryDataForOutput(parseResult.result);
+            pendingRowData.push({
+              level: message.level,
+              data: rowData,
+            });
+          }
 
-        startConsoleLogProcessingTask();
-      }
-      break;
-    default:
-      break;
-  }
-});
+          startConsoleLogProcessingTask();
+        }
+        break;
+      default:
+        break;
+    }
+  });
+}
+connect();
 
 function sendMessage(message: RuntimeMessage): void {
   port.postMessage(message);

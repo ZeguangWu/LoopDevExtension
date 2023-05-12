@@ -21,33 +21,42 @@ window.addEventListener("consoleMessage", function (e: Event) {
 });
 
 // Listen for messages from background script
-const port = chrome.runtime.connect({
-  name: "content-script",
-});
-port.onMessage.addListener((message) => {
-  if (message.to !== "content-script") {
-    return;
-  }
+let port: chrome.runtime.Port;
+function connect() {
+  port = chrome.runtime.connect({
+    name: "content-script",
+  });
 
-  // send config to dev tool when it's open.
-  switch (message.type) {
-    case "devToolsOpen":
-      sendMessage({
-        from: "content-script",
-        to: "devtools",
-        type: "extensionConfig",
-        extensionConfig,
-      });
-      break;
-    case "extensionConfig":
-      // report extension config to the loaded page.
-      extensionConfig = message.extensionConfig;
-      window.dispatchEvent(new CustomEvent("extensionConfig", { detail: { extensionConfig } }));
-      break;
-    default:
-      break;
-  }
-});
+  // auto reconnect.
+  port.onDisconnect.addListener(connect);
+  
+  port.onMessage.addListener((message) => {
+    if (message.to !== "content-script") {
+      return;
+    }
+
+    // send config to dev tool when it's open.
+    switch (message.type) {
+      case "devToolsOpen":
+        sendMessage({
+          from: "content-script",
+          to: "devtools",
+          type: "extensionConfig",
+          extensionConfig,
+        });
+        break;
+      case "extensionConfig":
+        // report extension config to the loaded page.
+        extensionConfig = message.extensionConfig;
+        window.dispatchEvent(new CustomEvent("extensionConfig", { detail: { extensionConfig } }));
+        break;
+      default:
+        break;
+    }
+  });
+}
+
+connect();
 
 function sendMessage(message: RuntimeMessage): void {
   port.postMessage(message);
