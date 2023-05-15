@@ -1,9 +1,10 @@
 import { RowData } from "./HTMLTable";
 import { ExtensionConfig, getExtensionConfig } from "../../extensionConfig";
 import { ConsoleLogViewerPanelWindow } from "./consoleLogViewerPanel";
-import { RuntimeMessage } from "../../message";
+import { RuntimeMessage, RuntimeMessageEndpoint } from "../../message";
+import { DevToolsInitContext } from "../../contracts/devtoolsInitContext";
 
-export async function devtools(port: chrome.runtime.Port) {
+export async function devtools(): Promise<DevToolsInitContext> {
   let consoleLogViewerPanel: chrome.devtools.panels.ExtensionPanel;
   let consoleLogViewerPanelWindow: ConsoleLogViewerPanelWindow;
   let consoleLogProcessingTaskId: NodeJS.Timeout | undefined;
@@ -12,37 +13,39 @@ export async function devtools(port: chrome.runtime.Port) {
 
   let extensionConfig: ExtensionConfig;
 
-  port.onMessage.addListener((message: RuntimeMessage) => {
-    if (message.to !== "devtools") {
-      return;
-    }
+  const registerRuntimeMessagePort = (port: chrome.runtime.Port) => {
+    port.onMessage.addListener((message: RuntimeMessage) => {
+      if (message.to !== "devtools") {
+        return;
+      }
 
-    switch (message.type) {
-      case "extensionConfig":
-      case "pageLoaded":
-        {
-          extensionConfig = message.extensionConfig as ExtensionConfig;
-          applyExtensionConfig(extensionConfig);
-        }
-        break;
-      case "consoleMessage":
-        if (extensionConfig.consoleLogViewer.enabled && consoleLogViewerPanelWindow && consoleLogViewerPanelWindow.shouldCapture) {
-          const parseResult = tryParseJSON(message.message);
-          if (parseResult.result) {
-            const rowData = prepTelemetryDataForOutput(parseResult.result);
-            pendingRowData.push({
-              level: message.level,
-              data: rowData,
-            });
+      switch (message.type) {
+        case "extensionConfig":
+        case "pageLoaded":
+          {
+            extensionConfig = message.extensionConfig as ExtensionConfig;
+            applyExtensionConfig(extensionConfig);
           }
+          break;
+        case "consoleMessage":
+          if (extensionConfig.consoleLogViewer.enabled && consoleLogViewerPanelWindow && consoleLogViewerPanelWindow.shouldCapture) {
+            const parseResult = tryParseJSON(message.message);
+            if (parseResult.result) {
+              const rowData = prepTelemetryDataForOutput(parseResult.result);
+              pendingRowData.push({
+                level: message.level,
+                data: rowData,
+              });
+            }
 
-          startConsoleLogProcessingTask();
-        }
-        break;
-      default:
-        break;
-    }
-  });
+            startConsoleLogProcessingTask();
+          }
+          break;
+        default:
+          break;
+      }
+    });
+  };
 
   function applyExtensionConfig(extensionConfig: ExtensionConfig) {
     if (!extensionConfig.enabled || !extensionConfig.consoleLogViewer.enabled) {
@@ -134,4 +137,8 @@ export async function devtools(port: chrome.runtime.Port) {
 
   extensionConfig = await getExtensionConfig();
   applyExtensionConfig(extensionConfig);
+
+  return {
+    registerRuntimeMessagePort,
+  };
 }

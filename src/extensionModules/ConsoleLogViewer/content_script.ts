@@ -1,13 +1,15 @@
 import { ExtensionConfig } from "../../extensionConfig";
-import { ContentScriptInitContext } from "../../ContentScriptorInitContext";
+import { ContentScriptInitContext } from "../../contracts/contentScriptInitContext";
+import { RuntimeMessage } from "../../message";
 
-export async function contentScript(port: chrome.runtime.Port): Promise<ContentScriptInitContext> {
+export async function contentScript(): Promise<ContentScriptInitContext> {
   let extensionConfig: ExtensionConfig;
+  let runtimePort: chrome.runtime.Port;
 
   // Listen for messages from the loaded page, and forward them to devtools.
   window.addEventListener("consoleMessage", function (e: Event) {
     const customEvent = e as CustomEvent;
-    port.postMessage({
+    runtimePort.postMessage({
       from: "content-script",
       to: "devtools",
       type: customEvent.type,
@@ -16,30 +18,28 @@ export async function contentScript(port: chrome.runtime.Port): Promise<ContentS
     });
   });
 
-  port.onMessage.addListener((message) => {
-    if (message.to !== "content-script") {
-      return;
-    }
+  const registerRuntimeMessagePort = (port: chrome.runtime.Port) => {
+    runtimePort = port;    
+    runtimePort.onMessage.addListener((message:RuntimeMessage) => {
+      if (message.to !== "content-script") {
+        return;
+      }
+  
+      // send config to dev tool when it's open.
+      switch (message.type) {
+        case "extensionConfig":
+          // report extension config to the loaded page.
+          extensionConfig = message.extensionConfig;
+          window.dispatchEvent(new CustomEvent("extensionConfig", { detail: { extensionConfig } }));
+          break;
+        default:
+          break;
+      }
+    });
+  }
 
-    // send config to dev tool when it's open.
-    switch (message.type) {
-      case "devToolsOpen":
-        port.postMessage({
-          from: "content-script",
-          to: "devtools",
-          type: "pageLoaded",
-          extensionConfig,
-        });
-        break;
-      case "extensionConfig":
-        // report extension config to the loaded page.
-        extensionConfig = message.extensionConfig;
-        window.dispatchEvent(new CustomEvent("extensionConfig", { detail: { extensionConfig } }));
-        break;
-      default:
-        break;
-    }
-  });
-
-  return { injectedScripts: [chrome.runtime.getURL("extensionModules/ConsoleLogViewer/inject_consoleLog.js")] };
+  return { 
+    injectedScripts: [chrome.runtime.getURL("extensionModules/ConsoleLogViewer/inject_consoleLog.js")],
+    registerRuntimeMessagePort
+   };
 }

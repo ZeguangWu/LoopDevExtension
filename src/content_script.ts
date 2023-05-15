@@ -1,13 +1,13 @@
 import { ExtensionConfig, getExtensionConfig } from "./extensionConfig";
-import { ContentScriptInitContext } from "./ContentScriptorInitContext";
+import { ContentScriptInitContext } from "./contracts/contentScriptInitContext";
 
 import * as ConsoleLogViewer from "./extensionModules/ConsoleLogViewer/content_script";
 import * as ImageEnhancement from "./extensionModules/ImageEnhancement/content_script";
 
 let extensionConfig: ExtensionConfig;
 const scriptInjectionPromises: Promise<void>[] = [];
+const moduleContexts: ContentScriptInitContext[] = [];
 
-// Listen for messages from background script
 let port: chrome.runtime.Port;
 function connect() {
   port = chrome.runtime.connect({
@@ -15,9 +15,19 @@ function connect() {
   });
 
   // auto reconnect.
-  port.onDisconnect.addListener(connect);
+  // According to https://developer.chrome.com/docs/extensions/whatsnew/#m110-sw-idle,
+  // An extension service worker will be shut down after either thirty seconds of inactivity. (╬▔皿▔)╯
+  port.onDisconnect.addListener(() => {
+    console.log("content-script port disconnected. reconnecting...");
+    connect();
+    console.log("content-script port reconnected.");
+  });
+
+  // invoke port change handlers in each module.
+  moduleContexts.forEach((context) => {
+    context.registerRuntimeMessagePort(port);
+  });
 }
-connect();
 
 async function injectScriptTag(src: string): Promise<void> {
   const scriptElement = document.createElement("script");
@@ -33,28 +43,32 @@ async function injectScriptTag(src: string): Promise<void> {
 }
 
 function initializeModule(context: ContentScriptInitContext) {
+  moduleContexts.push(context);
+
   context.injectedScripts.forEach((script) => {
     scriptInjectionPromises.push(injectScriptTag(script));
   });
 }
 
 async function initialize() {
-  initializeModule(await ConsoleLogViewer.contentScript(port));
-  initializeModule(await ImageEnhancement.contentScript(port));
+  initializeModule(await ConsoleLogViewer.contentScript());
+  initializeModule(await ImageEnhancement.contentScript());
 
   const extensionConfigPromise = getExtensionConfig().then((config) => (extensionConfig = config));
-  Promise.allSettled([...scriptInjectionPromises, extensionConfigPromise]).then(() => {
-    // report extension config to runtime upon new page load.
-    port.postMessage({
-      from: "content-script",
-      to: "devtools",
-      type: "pageLoaded",
-      extensionConfig,
-    });
+  await Promise.allSettled([...scriptInjectionPromises, extensionConfigPromise]);
 
-    // report extensionConfig to the loaded page.
-    window.dispatchEvent(new CustomEvent("extensionConfig", { detail: { extensionConfig } }));
+  connect();
+
+  // report extension config to runtime upon new page load.
+  port.postMessage({
+    from: "content-script",
+    to: "devtools",
+    type: "pageLoaded",
+    extensionConfig,
   });
+
+  // report extensionConfig to the loaded page.
+  window.dispatchEvent(new CustomEvent("extensionConfig", { detail: { extensionConfig } }));
 }
 
 window.addEventListener("load", async function () {
