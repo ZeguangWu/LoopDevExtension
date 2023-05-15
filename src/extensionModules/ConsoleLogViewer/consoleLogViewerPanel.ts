@@ -103,10 +103,22 @@ function getTableName(rowData: RowData): string {
     return "unknown_namespace";
   }
 
-  if (rowData.data["category"] === "Activity") {
-    return `${rowData.data["namespace"]}_${rowData.data["category"]}_${rowData.data["eventName"]}`;
-  } else {
-    return `${rowData.data["namespace"]}_${rowData.data["category"] ?? "unknownCategory"}`;
+  const prefix = "Office_Fluid_";
+  const namespace = rowData.data["namespace"];
+  const category = rowData.data["category"];
+  const subCategory = rowData.data["subCategory"];
+  const eventName = rowData.data["eventName"];
+  switch (category.toLocaleLowerCase()) {
+    case "useraction":
+      return `${prefix}${namespace}_UserAction_${eventName}`;
+    case "activity":
+      return `${prefix}${namespace}_Activity_${eventName}`;
+    case "error":
+      return `${prefix}${namespace}_Error${subCategory ? "_" + subCategory : ""}`;
+    case "generic":
+      return `${prefix}${namespace}_Generic${subCategory ? "_" + subCategory : ""}`;
+    default:
+      return `${prefix}${namespace}_${category}${subCategory ? "_" + subCategory : ""}`;
   }
 }
 
@@ -114,6 +126,7 @@ function createTable(tableName: string): HTMLTable {
   let containerElement = document.querySelector("#tableContainer") as HTMLDivElement;
 
   const tableWrapper = document.createElement("div");
+  tableWrapper.setAttribute("table", tableName);
   tableWrapper.classList.add("tableWrapper");
   tableWrapper.style.marginBottom = "10px";
   tableWrapper.setAttribute("table", tableName);
@@ -171,7 +184,17 @@ function createTable(tableName: string): HTMLTable {
   // observer table element size to update scrollbar.
   resizeObserver.observe(tableElement);
 
-  containerElement.appendChild(tableWrapper);
+  // insert the table wrapper into containerElement, make sure the table wrapper is order by the value of table attribute.
+  const existingTableWrappers = containerElement.querySelectorAll(".tableWrapper");
+  const insertIndex = [...existingTableWrappers].findIndex((existingTableWrapper) => {
+    const existingTableName = existingTableWrapper.getAttribute("table");
+    return existingTableName && tableName < existingTableName;
+  });
+  if (insertIndex >= 0) {
+    containerElement.insertBefore(tableWrapper, existingTableWrappers[insertIndex]);
+  } else {
+    containerElement.appendChild(tableWrapper);
+  }
 
   return new HTMLTable(tableElement);
 }
