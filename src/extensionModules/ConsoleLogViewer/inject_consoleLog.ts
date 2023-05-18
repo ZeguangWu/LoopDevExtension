@@ -29,7 +29,9 @@ if (!oldConsoleLog) {
       }
     }
 
-    oldConsoleLog?.apply(console, args);
+    if (oldConsoleLog) {
+      oldConsoleLog.apply(console, args);
+    }
   };
 }
 
@@ -49,7 +51,9 @@ if (!oldConsoleWarn) {
       }
     }
 
-    oldConsoleWarn?.apply(console, args);
+    if (oldConsoleWarn) {
+      oldConsoleWarn.apply(console, args);
+    }
   };
 }
 
@@ -69,7 +73,9 @@ if (!oldConsoleError) {
       }
     }
 
-    oldConsoleError?.apply(console, args);
+    if (oldConsoleError) {
+      oldConsoleError.apply(console, args);
+    }
   };
 }
 
@@ -88,7 +94,8 @@ if (!oldConsoleDebug) {
         return;
       }
     }
-
-    oldConsoleDebug?.apply(console, args);
+    if (oldConsoleDebug) {
+      oldConsoleDebug.apply(console, args);
+    }
   };
 }
